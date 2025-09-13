@@ -9,23 +9,27 @@
 }
 
 .toggles {
-    position: relative;
-    top: 50px;
-    left: 10%;
-    width: 80%;
-    display: flex;
-    justify-content: space-between;
+    width: 50%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 }
 
+.alt {
+	position: relative;
+    width: 80%;
+	top: 50px;
+	left: 10%;
+	display: flex;
+}
 .hline {
-    height: 1px;
-    width: 100%;
-    border-bottom: 1px dashed black ;
-
+	height: 1px;
+	width: 100%;
+	border-bottom: 1px dashed black;
 }
 
 .vline {
-    height: 100%;
-    width: 1px;
-    border-right: 1px dashed black ;
+	height: 100%;
+	width: 1px;
+	border-right: 1px dashed black;
 }

@@ -11,7 +11,24 @@ const courses = {
 	Açao: {
 		seg: { start: "15:00", end: "18:00" },
 	},
+	Cartografia: {
+		ter: { start: "15:00", end: "18:00" },
+	},
+	LogLin: {
+		qua: { start: "08:30", end: "10:00" },
+		qui: { start: "10:00", end: "11:30" },
+	},
+	PortugalXX: {
+		qua: { start: "13:30", end: "15:00" },
+		qui: { start: "11:30", end: "13:00" },
+	},
+	Mente: {
+		ter: { start: "13:30", end: "15:00" },
+		qua: { start: "15:00", end: "16:30" },
+	},
 };
+
+const days = ["seg", "ter", "qua", "qui", "sex"];
 
 // TIMES vv
 
@@ -152,7 +169,6 @@ function drawSchedule() {
 
 	// Days
 
-	const days = ["seg", "ter", "qua", "qui", "sex"];
 	for (let i = 0; i < days.length; i++) {
 		const row = document.createElement("div");
 		row.classList.add("row");
@@ -183,8 +199,6 @@ function drawSchedule() {
 
 	for (const courseName in courses) {
 		const course = courses[courseName];
-
-        console.log(course)
 
 		for (const day in course) {
 			const courseTime = course[day];
@@ -219,7 +233,8 @@ function drawSchedule() {
 			courseDiv.style.left = `${courseDayPercentile}%`;
 			courseDiv.style.width = `${courseWidth}%`;
 			courseDiv.style.height = `${courseHeight}%`;
-			courseDiv.style.backgroundColor = courseColors[Object.keys(courses).indexOf(courseName)];
+			courseDiv.style.backgroundColor =
+				courseColors[Object.keys(courses).indexOf(courseName)];
 			courseDiv.style.borderRadius = "10px";
 			courseDiv.textContent = courseName;
 			table.appendChild(courseDiv);
@@ -232,7 +247,8 @@ function drawSchedule() {
 	toggles.classList.add("toggles");
 
 	for (const courseName in courses) {
-		const course = courses[courseName];
+		const group = document.createElement("div");
+		group.classList.add("group");
 
 		const toggle = document.createElement("input");
 		toggle.addEventListener("change", () => {
@@ -250,17 +266,76 @@ function drawSchedule() {
 		toggle.type = "checkbox";
 		toggle.checked = true;
 		toggle.id = courseName;
-		toggles.appendChild(toggle);
+		toggle.style.accentColor =
+			courseColors[Object.keys(courses).indexOf(courseName)];
+		group.appendChild(toggle);
 
 		const label = document.createElement("label");
 		label.htmlFor = courseName;
 		label.textContent = courseName;
-		toggles.appendChild(label);
+		group.appendChild(label);
+		toggles.appendChild(group);
 	}
 
-	body.appendChild(toggles);
+	// Conflicts
+
+	const conflictsDiv = document.createElement("div");
+	conflictsDiv.classList.add("conflicts");
+	conflictsDiv.textContent = "Conflicts: ";
+
+	const conflicts = findConflicts(courses);
+	conflicts.forEach((conflict) => {
+		const conflictDiv = document.createElement("div");
+		conflictDiv.classList.add("conflict");
+		conflictDiv.textContent = conflict.join(", ");
+		conflictsDiv.appendChild(conflictDiv);
+	});
+
+	const alt = document.createElement("div");
+	alt.classList.add("alt");
+	alt.appendChild(toggles);
+	alt.appendChild(conflictsDiv);
+	body.appendChild(alt);
 }
 
-body.textContent = JSON.stringify(timesToPercentile(normalizedTimes), null, 2);
+function findConflicts(courses) {
+	// Make full timetables
+	const timetable = {};
+	days.forEach((day) => {
+		timetable[day] = [];
+	});
+	for (const courseName in courses) {
+		const course = courses[courseName];
+
+		for (const day in course) {
+			timetable[day].push({
+				name: courseName,
+				start: course[day].start,
+				end: course[day].end,
+			});
+		}
+	}
+
+	// Find conflicts
+	const conflicts = [];
+	for (const day in timetable) {
+		for (let i = 0; i < timetable[day].length; i++) {
+			for (let j = i + 1; j < timetable[day].length; j++) {
+				if (
+					timetable[day][i].end > timetable[day][j].start &&
+					timetable[day][i].start < timetable[day][j].end
+				) {
+					conflicts.push([
+						timetable[day][i].name,
+						timetable[day][j].name,
+					]);
+				}
+			}
+		}
+	}
+	return conflicts;
+}
+
+body.textContent = JSON.stringify(findConflicts(courses), 0, 2);
 
 drawSchedule();
