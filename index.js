@@ -26,6 +26,14 @@ const courses = {
 		ter: { start: "13:30", end: "15:00" },
 		qua: { start: "15:00", end: "16:30" },
 	},
+	FiloComp: {
+		qui: { start: "13:30", end: "16:30" },
+	},
+	FiloContemp: { ter: { start: "16:30", end: "19:30" } },
+	CultContemp: {
+		seg: { start: "08:30", end: "10:00" },
+		qua: { start: "08:30", end: "10:00" },
+	},
 };
 
 const days = ["seg", "ter", "qua", "qui", "sex"];
@@ -41,6 +49,7 @@ const times = [
 	"15:00",
 	"16:30",
 	"18:00",
+	"19:30",
 ];
 
 function normalizeTime(time) {
@@ -262,6 +271,7 @@ function drawSchedule() {
 					(div) => (div.style.display = "none")
 				);
 			}
+			updateConflicts();
 		});
 		toggle.type = "checkbox";
 		toggle.checked = true;
@@ -336,6 +346,49 @@ function findConflicts(courses) {
 	return conflicts;
 }
 
-body.textContent = JSON.stringify(findConflicts(courses), 0, 2);
+function updateConflicts() {
+	const conflictsDiv = document.querySelector(".conflicts");
+	conflictsDiv.innerHTML = "Conflicts: ";
+
+	const conflicts = findConflicts(courses);
+
+	const table = document.querySelector(".table");
+
+	let error = false;
+
+	conflicts.forEach((conflict) => {
+		const [courseA, courseB] = conflict;
+		const conflictDiv = document.createElement("div");
+		conflictDiv.classList.add("conflict");
+		conflictDiv.textContent = conflict.join(", ");
+
+		// Check if both courses are selected
+		const toggleA = document.getElementById(courseA);
+		const toggleB = document.getElementById(courseB);
+
+		if (toggleA.checked && toggleB.checked) {
+			conflictDiv.style.color = "red";
+			conflictDiv.style.fontWeight = "bold";
+			error = true;
+		} else {
+			conflictDiv.style.color = "black";
+			conflictDiv.style.fontWeight = "normal";
+			error = error || false;
+		}
+
+		conflictsDiv.appendChild(conflictDiv);
+	});
+
+	if (error) {
+		table.style.backgroundColor = "rgba(255, 0, 0, 0.5)";
+		table.style.borderColor = "red";
+		table.style.borderWidth = "5px";
+	} else {
+		table.style.backgroundColor = "white";
+		table.style.borderColor = "black";
+		table.style.borderWidth = "1px";
+	}
+}
 
 drawSchedule();
+updateConflicts();
