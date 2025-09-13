@@ -1,0 +1,31 @@
+.table {
+	height: 400px;
+	width: 80%;
+	position: relative;
+	top: 50px;
+	left: 10%;
+	border: 1px solid black;
+	border-radius: 10px;
+}
+
+.toggles {
+    position: relative;
+    top: 50px;
+    left: 10%;
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.hline {
+    height: 1px;
+    width: 100%;
+    border-bottom: 1px dashed black ;
+
+}
+
+.vline {
+    height: 100%;
+    width: 1px;
+    border-right: 1px dashed black ;
+}
