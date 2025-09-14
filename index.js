@@ -390,5 +390,84 @@ function updateConflicts() {
 	}
 }
 
+function findAllCombinations(courses, courseAmount = 5) {
+	const conflicts = findConflicts(courses);
+	const courseNames = Object.keys(courses);
+
+	const combinations = [];
+
+	const checkRepetition = (combination) => {
+		for (let i = 0; i < combinations.length; i++) {
+            const currentCheck = combinations[i];
+            const repeated = currentCheck.every((course, index) => {
+                if (course === combination[index]) {
+                    return true;
+                }
+                return false;
+            })
+            if (repeated) {
+                return true;
+            }
+		}
+		return false;
+	};
+
+	const checkConflicts = (combination, newCourseName) => {
+		for (let i = 0; i < combination.length; i++) {
+			const currentConflict = [combination[i], newCourseName];
+			if (
+				conflicts.some(
+					(conflict) =>
+						conflict.includes(currentConflict[0]) &&
+						conflict.includes(currentConflict[1])
+				)
+			) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	const backtrack = (combination, index) => {
+		if (index === courseAmount) {
+			const normalizedCombination = [
+				...combination.sort((a, b) => {
+					if (a < b) {
+						return -1;
+					}
+					if (a > b) {
+						return 1;
+					}
+					return 0;
+				}),
+			];
+
+			if (!checkRepetition(normalizedCombination)) {
+				combinations.push(normalizedCombination);
+			}
+			return;
+		}
+
+		for (let i = 0; i < courseNames.length; i++) {
+			const courseName = courseNames[i];
+
+			if (
+				!combination.includes(courseName) &&
+				!checkConflicts(combination, courseName)
+			) {
+				combination.push(courseName);
+				backtrack(combination, index + 1);
+				combination.pop();
+			}
+		}
+	};
+
+	backtrack([], 0);
+	return combinations;
+}
+
+body.innerHTML = findAllCombinations(courses)
+	.map((c) => c.join("-"))
+	.join(" <br> ");
 drawSchedule();
 updateConflicts();
