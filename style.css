@@ -5,22 +5,35 @@
 	top: 50px;
 	left: 10%;
 	border: 1px solid black;
-	border-radius: 10px;;
+	border-radius: 10px;
 }
 
 .toggles {
-    width: 50%;
+	min-width: 7rem;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
+	gap: 1rem;
+}
+
+.conflicts {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.combinations {
+    	display: flex;
+	flex-direction: column;
+	gap: 1rem;
 }
 
 .alt {
 	position: relative;
-    width: 80%;
+	width: 80%;
 	top: 50px;
 	left: 10%;
 	display: flex;
+    gap: 2rem;
 }
 .hline {
 	height: 1px;

@@ -297,14 +297,31 @@ function drawSchedule() {
 	conflicts.forEach((conflict) => {
 		const conflictDiv = document.createElement("div");
 		conflictDiv.classList.add("conflict");
-		conflictDiv.textContent = conflict.join(", ");
+		conflictDiv.textContent = conflict.join("//");
 		conflictsDiv.appendChild(conflictDiv);
 	});
+
+	// Possible Combinations
+
+	const combinationsDiv = document.createElement("div");
+	combinationsDiv.classList.add("combinations");
+	combinationsDiv.textContent = "Possible Combinations: ";
+
+	const combinations = findAllCombinations(courses);
+	combinations.forEach((combination) => {
+		const combinationDiv = document.createElement("div");
+		combinationDiv.classList.add("combination");
+		combinationDiv.textContent = combination.join(", ");
+		combinationsDiv.appendChild(combinationDiv);
+	});
+
+	//Alt
 
 	const alt = document.createElement("div");
 	alt.classList.add("alt");
 	alt.appendChild(toggles);
 	alt.appendChild(conflictsDiv);
+	alt.appendChild(combinationsDiv);
 	body.appendChild(alt);
 }
 
@@ -393,70 +410,37 @@ function updateConflicts() {
 function findAllCombinations(courses, courseAmount = 5) {
 	const conflicts = findConflicts(courses);
 	const courseNames = Object.keys(courses);
-
 	const combinations = [];
-
-	const checkRepetition = (combination) => {
-		for (let i = 0; i < combinations.length; i++) {
-            const currentCheck = combinations[i];
-            const repeated = currentCheck.every((course, index) => {
-                if (course === combination[index]) {
-                    return true;
-                }
-                return false;
-            })
-            if (repeated) {
-                return true;
-            }
-		}
-		return false;
-	};
+	const seen = new Set();
 
 	const checkConflicts = (combination, newCourseName) => {
-		for (let i = 0; i < combination.length; i++) {
-			const currentConflict = [combination[i], newCourseName];
-			if (
-				conflicts.some(
-					(conflict) =>
-						conflict.includes(currentConflict[0]) &&
-						conflict.includes(currentConflict[1])
-				)
-			) {
-				return true;
-			}
-		}
-		return false;
+		return combination.some((existingCourse) =>
+			conflicts.some(
+				(conflict) =>
+					conflict.includes(existingCourse) &&
+					conflict.includes(newCourseName)
+			)
+		);
 	};
 
-	const backtrack = (combination, index) => {
-		if (index === courseAmount) {
-			const normalizedCombination = [
-				...combination.sort((a, b) => {
-					if (a < b) {
-						return -1;
-					}
-					if (a > b) {
-						return 1;
-					}
-					return 0;
-				}),
-			];
-
-			if (!checkRepetition(normalizedCombination)) {
-				combinations.push(normalizedCombination);
+	const backtrack = (combination, startIndex) => {
+		if (combination.length === courseAmount) {
+			const key = combination.join("-");
+			if (!seen.has(key)) {
+				seen.add(key);
+				combinations.push([...combination]);
 			}
 			return;
 		}
 
-		for (let i = 0; i < courseNames.length; i++) {
+		for (let i = startIndex; i < courseNames.length; i++) {
 			const courseName = courseNames[i];
-
 			if (
 				!combination.includes(courseName) &&
 				!checkConflicts(combination, courseName)
 			) {
 				combination.push(courseName);
-				backtrack(combination, index + 1);
+				backtrack(combination, i + 1);
 				combination.pop();
 			}
 		}
