@@ -303,16 +303,51 @@ function drawSchedule() {
 
 	// Possible Combinations
 
-	const combinationsDiv = document.createElement("div");
-	combinationsDiv.classList.add("combinations");
-	combinationsDiv.textContent = "Possible Combinations: ";
+	const combinationsElem = document.createElement("fieldset");
+	combinationsElem.classList.add("combinations");
+	combinationsElem.textContent = "Possible Combinations: ";
 
 	const combinations = findAllCombinations(courses);
-	combinations.forEach((combination) => {
+	combinations.forEach((combination, index) => {
 		const combinationDiv = document.createElement("div");
 		combinationDiv.classList.add("combination");
-		combinationDiv.textContent = combination.join(", ");
-		combinationsDiv.appendChild(combinationDiv);
+
+		const radioBtn = document.createElement("input");
+		radioBtn.addEventListener("change", () => {
+			console.log("changed!");
+			const allToggles = document.querySelectorAll(
+				"div.toggles > div.group > input[type='checkbox']"
+			);
+			const combinationToggles = combination.map((courseName) =>
+				document.getElementById(courseName)
+			);
+
+			allToggles.forEach((toggle) => {
+				if (toggle.checked) {
+					toggle.checked = false;
+					toggle.dispatchEvent(new Event("change"));
+				}
+			});
+
+			combinationToggles.forEach((toggle) => {
+				if (!toggle.checked) {
+					toggle.checked = true;
+					toggle.dispatchEvent(new Event("change"));
+				}
+			});
+		});
+		radioBtn.type = "radio";
+		radioBtn.checked = false;
+		radioBtn.name = "combination";
+		radioBtn.value = index;
+		radioBtn.id = index;
+		const label = document.createElement("label");
+		label.htmlFor = index;
+		label.textContent = combination.join(", ");
+		combinationDiv.appendChild(radioBtn);
+		combinationDiv.appendChild(label);
+
+		combinationsElem.appendChild(combinationDiv);
 	});
 
 	//Alt
@@ -321,7 +356,7 @@ function drawSchedule() {
 	alt.classList.add("alt");
 	alt.appendChild(toggles);
 	alt.appendChild(conflictsDiv);
-	alt.appendChild(combinationsDiv);
+	alt.appendChild(combinationsElem);
 	body.appendChild(alt);
 }
 
@@ -450,8 +485,5 @@ function findAllCombinations(courses, courseAmount = 5) {
 	return combinations;
 }
 
-body.innerHTML = findAllCombinations(courses)
-	.map((c) => c.join("-"))
-	.join(" <br> ");
 drawSchedule();
 updateConflicts();
