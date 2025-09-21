@@ -2,20 +2,20 @@ const body = document.querySelector("body");
 
 const initialCourses = {
 	"Cult.Barroca": {
-		seg: { start: "13:30", end: "15:00" },
-		qui: { start: "11:30", end: "13:00" },
+		seg: { start: "13:30", end: "15:00", info: "G402" },
+		qui: { start: "11:30", end: "13:00", info: "G403" },
 	},
 	Metafisica: {
-		qua: { start: "13:30", end: "16:30" },
+		qua: { start: "13:30", end: "16:30", info: "G404" },
 	},
 	Açao: {
-		seg: { start: "15:00", end: "18:00" },
+		seg: { start: "15:00", end: "18:00", info: "G405" },
 	},
 	Cartografia: {
-		ter: { start: "15:00", end: "18:00" },
+		ter: { start: "15:00", end: "18:00", info: "G406" },
 	},
 	LogLin: {
-		qua: { start: "08:30", end: "10:00" },
+		qua: { start: "08:30", end: "10:00", info: "G407" },
 		qui: { start: "10:00", end: "11:30" },
 	},
 	PortugalXX: {
@@ -31,8 +31,8 @@ const initialCourses = {
 	},
 	FiloContemp: { ter: { start: "16:30", end: "19:30" } },
 	CultContemp: {
-		seg: { start: "08:30", end: "10:00" },
-		qua: { start: "08:30", end: "10:00" },
+		seg: { start: "08:30", end: "10:00", info: "G402" },
+		qua: { start: "08:30", end: "10:00", info: "G403" },
 	},
 };
 
@@ -218,7 +218,7 @@ function drawSchedule() {
 		}% - 1.5ch)`;
 		row.appendChild(cell);
 
-		if (i == days.length ) continue;
+		if (i == days.length) continue;
 
 		const line = document.createElement("div");
 		line.classList.add("vline");
@@ -266,7 +266,16 @@ function drawSchedule() {
 			courseDiv.style.backgroundColor =
 				courseColors[Object.keys(courses).indexOf(courseName)];
 			courseDiv.style.borderRadius = "10px";
-			courseDiv.textContent = courseName;
+			const courseNameDiv = document.createElement("div");
+			courseNameDiv.textContent = courseName;
+			courseDiv.appendChild(courseNameDiv);
+            console.log(course[day])
+			if (course[day].info) {
+				const courseInfoDiv = document.createElement("div");
+                courseInfoDiv.classList.add("info");
+				courseInfoDiv.textContent = course[day].info;
+				courseDiv.appendChild(courseInfoDiv);
+			}
 			table.appendChild(courseDiv);
 		}
 	}
@@ -579,13 +588,19 @@ function mountCourseForm() {
 	function addRow(init = { day: days[0], start: times[0], end: times[1] }) {
 		const row = document.createElement("div");
 		row.style.display = "grid";
-		row.style.gridTemplateColumns = "120px 1fr 1fr auto";
+		row.style.gridTemplateColumns = "120px 1fr 1fr 1fr auto";
 		row.style.alignItems = "center";
 		row.style.gap = ".5rem";
 
 		const daySel = makeSelect(days, init.day);
 		const startSel = makeSelect(times, init.start);
 		const endSel = makeSelect(times, init.end);
+        const infoInput = document.createElement("input");
+        infoInput.type = "text";
+        infoInput.placeholder = "Info";
+        infoInput.style.padding = ".3rem .5rem";
+        infoInput.style.border = "1px solid #ccc";
+        infoInput.style.borderRadius = "6px";
 		const del = document.createElement("button");
 		del.type = "button";
 		del.textContent = "✕";
@@ -600,6 +615,7 @@ function mountCourseForm() {
 		row.appendChild(daySel);
 		row.appendChild(startSel);
 		row.appendChild(endSel);
+        row.appendChild(infoInput);
 		row.appendChild(del);
 		rowsHost.appendChild(row);
 	}
@@ -642,6 +658,7 @@ function mountCourseForm() {
 			const day = daySel.value;
 			const start = startSel.value;
 			const end = endSel.value;
+            const info = row.querySelector("input").value;
 
 			// Validate ordering
 			const startIdx = times.indexOf(start);
@@ -655,7 +672,7 @@ function mountCourseForm() {
 				return;
 			}
 
-			entry[day] = { start, end };
+			entry[day] = { start, end, info };
 		}
 
 		// Merge into courses
