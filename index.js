@@ -171,23 +171,27 @@ function drawSchedule() {
 		row.classList.add("row");
 		row.style.position = "absolute";
 		row.style.top = `calc(${percentileTimes[i]}% - 0.5rem)`;
-		row.style.left = "-3rem";
+		row.style.left = "0"; // <-- was "-3rem"
 		row.style.width = "100%";
 		table.appendChild(row);
 
 		const cell = document.createElement("div");
 		cell.classList.add("cell");
-		cell.textContent =
-			normalizedTimes[i].hours + ":" + normalizedTimes[i].minutes;
+		// pad minutes to 2 digits
+		const h = normalizedTimes[i].hours.toString().padStart(2, "0");
+		const m = normalizedTimes[i].minutes.toString().padStart(2, "0");
+		cell.textContent = `${h}:${m}`;
+		// place the label into the left gutter
+		cell.style.position = "absolute";
+		cell.style.left = `calc(-1 * var(--time-col) + 0.25rem)`;
 		row.appendChild(cell);
 
-		if (i == 0 || i == normalizedTimes.length - 1) {
-			continue;
-		}
+		if (i == 0 || i == normalizedTimes.length - 1) continue;
+
 		const line = document.createElement("div");
 		line.classList.add("hline");
 		line.style.position = "relative";
-		line.style.left = "3rem";
+		line.style.left = "0"; // <-- was "3rem"
 		line.style.top = "-0.6rem";
 		row.appendChild(line);
 	}
@@ -200,22 +204,26 @@ function drawSchedule() {
 		row.style.position = "absolute";
 		row.style.top = "0";
 		row.style.height = "100%";
-		row.style.left = `calc(${(i * 100) / days.length}% + 2rem)`;
+		row.style.left = `calc(${(i * 100) / days.length}% )`; // <-- remove "+ 2rem"
 		table.appendChild(row);
 
 		const cell = document.createElement("div");
 		cell.classList.add("cell");
 		cell.textContent = days[i];
+		cell.style.position = "absolute";
+		// put day labels in the top gutter, centered over each column
+		cell.style.top = `calc(-1 * var(--day-head) + 0.25rem)`;
+		cell.style.left = `calc(${(i * 100) / days.length}% + ${
+			50 / days.length
+		}% - 1.5ch)`;
 		row.appendChild(cell);
 
-		if (i == days.length - 1) {
-			continue;
-		}
+		if (i == days.length ) continue;
 
 		const line = document.createElement("div");
 		line.classList.add("vline");
 		line.style.position = "relative";
-		line.style.left = "4rem";
+		line.style.left = "0"; // <-- was "4rem"
 		line.style.top = "-1rem";
 		row.appendChild(line);
 	}
@@ -235,18 +243,15 @@ function drawSchedule() {
 				(time) => time == courseTime.end
 			);
 
-			const courseTimeStartPercentile =
-				timesToPercentile(normalizedTimes)[courseTimeStart];
-			const courseTimeEndPercentile =
-				timesToPercentile(normalizedTimes)[courseTimeEnd];
+			const courseTimeStartPercentile = parseFloat(
+				timesToPercentile(normalizedTimes)[courseTimeStart]
+			);
+			const courseTimeEndPercentile = parseFloat(
+				timesToPercentile(normalizedTimes)[courseTimeEnd]
+			);
 
 			const courseDayIndex = days.findIndex((currday) => currday == day);
-
-			const courseDayPercentile =
-				(courseDayIndex * 100) / days.length - 1;
-			console.log(courseDayPercentile);
-			console.log(courseDayIndex);
-			console.log(day);
+			const courseDayPercentile = (courseDayIndex * 100) / days.length; // <-- no "- 1"
 			const courseWidth = 100 / days.length;
 			const courseHeight =
 				courseTimeEndPercentile - courseTimeStartPercentile;
