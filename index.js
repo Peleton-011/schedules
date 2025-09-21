@@ -1,6 +1,6 @@
 const body = document.querySelector("body");
 
-const courses = {
+const initialCourses = {
 	"Cult.Barroca": {
 		seg: { start: "13:30", end: "15:00" },
 		qui: { start: "11:30", end: "13:00" },
@@ -35,6 +35,21 @@ const courses = {
 		qua: { start: "08:30", end: "10:00" },
 	},
 };
+
+const courses = {};
+
+try {
+	localStorage.setItem("courses", JSON.stringify(initialCourses));
+} catch {}
+
+try {
+	const saved = localStorage.getItem("courses");
+	if (saved) {
+		const parsed = JSON.parse(saved);
+		if (parsed && typeof parsed === "object")
+			Object.assign(courses, parsed);
+	}
+} catch {}
 
 const days = ["seg", "ter", "qua", "qui", "sex"];
 
@@ -484,6 +499,230 @@ function findAllCombinations(courses, courseAmount = 5) {
 	backtrack([], 0);
 	return combinations;
 }
+
+// Course input
+
+// === Simple Course Input UI ===
+// Assumes you already have: `const days = [...]`, `const times = [...]`, `const courses = {...}`
+// and your drawSchedule() + updateConflicts() functions.
+
+function mountCourseForm() {
+	const host = document.createElement("div");
+	host.className = "course-form";
+	host.style.marginTop = "1rem";
+	host.style.padding = "0.75rem";
+	host.style.border = "1px solid #ddd";
+	host.style.borderRadius = "8px";
+	host.style.maxWidth = "640px";
+	host.style.fontFamily = "system-ui, sans-serif";
+
+	host.innerHTML = `
+    <h3 style="margin:0 0 .5rem 0;">Add / Edit Course</h3>
+    <div style="display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;">
+      <label style="min-width:7rem;">Course name</label>
+      <input id="cf-name" type="text" placeholder="e.g. Metafisica" style="flex:1; padding:.4rem .6rem; border:1px solid #ccc; border-radius:6px;" />
+    </div>
+
+    <div id="cf-rows" style="margin-top:.75rem; display:grid; gap:.5rem;"></div>
+
+    <div style="display:flex; gap:.5rem; margin-top:.5rem;">
+      <button id="cf-add-row" type="button">+ Add day/time</button>
+      <button id="cf-clear-rows" type="button">Clear rows</button>
+      <button id="cf-fill-existing" type="button" title="Load an existing course into the form">Load existing</button>
+      <select id="cf-existing" style="margin-left:auto;">
+        <option value="">— Existing courses —</option>
+        ${Object.keys(courses)
+			.map((c) => `<option value="${c}">${c}</option>`)
+			.join("")}
+      </select>
+    </div>
+
+    <div style="display:flex; gap:.5rem; margin-top:.75rem;">
+      <button id="cf-save" type="button" style="background:#111;color:#fff;border:none;padding:.5rem .8rem;border-radius:6px;">Save course</button>
+      <button id="cf-delete" type="button" style="margin-left:auto; color:#b00020;">Delete course</button>
+    </div>
+
+    <details style="margin-top:.75rem;">
+      <summary>Import / Export JSON</summary>
+      <div style="display:flex; gap:.5rem; margin-top:.5rem;">
+        <button id="cf-export" type="button">Export</button>
+        <button id="cf-import" type="button">Import</button>
+      </div>
+      <textarea id="cf-json" rows="6" style="width:100%; margin-top:.5rem; font-family:monospace;"></textarea>
+    </details>
+  `;
+
+	document.body.appendChild(host);
+
+	const rowsHost = host.querySelector("#cf-rows");
+	const nameInput = host.querySelector("#cf-name");
+	const existingSelect = host.querySelector("#cf-existing");
+
+	function makeSelect(options, value) {
+		const sel = document.createElement("select");
+		sel.innerHTML = options
+			.map((v) => `<option value="${v}">${v}</option>`)
+			.join("");
+		if (value) sel.value = value;
+		sel.style.padding = ".3rem .5rem";
+		sel.style.border = "1px solid #ccc";
+		sel.style.borderRadius = "6px";
+		return sel;
+	}
+
+	function addRow(init = { day: days[0], start: times[0], end: times[1] }) {
+		const row = document.createElement("div");
+		row.style.display = "grid";
+		row.style.gridTemplateColumns = "120px 1fr 1fr auto";
+		row.style.alignItems = "center";
+		row.style.gap = ".5rem";
+
+		const daySel = makeSelect(days, init.day);
+		const startSel = makeSelect(times, init.start);
+		const endSel = makeSelect(times, init.end);
+		const del = document.createElement("button");
+		del.type = "button";
+		del.textContent = "✕";
+		del.title = "Remove row";
+		del.style.border = "none";
+		del.style.background = "transparent";
+		del.style.fontSize = "1rem";
+		del.style.cursor = "pointer";
+
+		del.addEventListener("click", () => row.remove());
+
+		row.appendChild(daySel);
+		row.appendChild(startSel);
+		row.appendChild(endSel);
+		row.appendChild(del);
+		rowsHost.appendChild(row);
+	}
+
+	// Controls
+	host.querySelector("#cf-add-row").addEventListener("click", () => addRow());
+	host.querySelector("#cf-clear-rows").addEventListener(
+		"click",
+		() => (rowsHost.innerHTML = "")
+	);
+
+	host.querySelector("#cf-fill-existing").addEventListener("click", () => {
+		const name = existingSelect.value;
+		if (!name || !courses[name]) return;
+		nameInput.value = name;
+		rowsHost.innerHTML = "";
+		const course = courses[name];
+		Object.keys(course).forEach((day) => {
+			addRow({ day, start: course[day].start, end: course[day].end });
+		});
+	});
+
+	host.querySelector("#cf-save").addEventListener("click", () => {
+		const name = nameInput.value.trim();
+		if (!name) {
+			alert("Please enter a course name.");
+			return;
+		}
+
+		const rows = Array.from(rowsHost.children);
+		if (!rows.length) {
+			alert("Add at least one day/time row.");
+			return;
+		}
+
+		// Build the course entry { day: {start, end}, ... }
+		const entry = {};
+		for (const row of rows) {
+			const [daySel, startSel, endSel] = row.querySelectorAll("select");
+			const day = daySel.value;
+			const start = startSel.value;
+			const end = endSel.value;
+
+			// Validate ordering
+			const startIdx = times.indexOf(start);
+			const endIdx = times.indexOf(end);
+			if (startIdx === -1 || endIdx === -1) {
+				alert("Invalid time selected.");
+				return;
+			}
+			if (endIdx <= startIdx) {
+				alert(`End must be after start for ${day}.`);
+				return;
+			}
+
+			entry[day] = { start, end };
+		}
+
+		// Merge into courses
+		courses[name] = entry;
+
+		// Persist (optional)
+		try {
+			localStorage.setItem("courses", JSON.stringify(courses));
+		} catch {}
+
+		// Re-render schedule + conflicts
+		rerenderSchedule();
+	});
+
+	host.querySelector("#cf-delete").addEventListener("click", () => {
+		const name = nameInput.value.trim();
+		if (!name) return;
+		if (!courses[name]) {
+			alert("Course not found.");
+			return;
+		}
+		if (!confirm(`Delete course "${name}"?`)) return;
+		delete courses[name];
+		try {
+			localStorage.setItem("courses", JSON.stringify(courses));
+		} catch {}
+		nameInput.value = "";
+		rowsHost.innerHTML = "";
+		rerenderSchedule();
+	});
+
+	host.querySelector("#cf-export").addEventListener("click", () => {
+		const ta = host.querySelector("#cf-json");
+		ta.value = JSON.stringify(courses, null, 2);
+		ta.select();
+		try {
+			document.execCommand("copy");
+		} catch {}
+	});
+
+	host.querySelector("#cf-import").addEventListener("click", () => {
+		const ta = host.querySelector("#cf-json");
+		try {
+			const parsed = JSON.parse(ta.value);
+			// very light validation
+			if (typeof parsed !== "object" || Array.isArray(parsed))
+				throw new Error("Invalid JSON");
+			Object.assign(courses, parsed);
+			localStorage.setItem("courses", JSON.stringify(courses));
+			// refresh existing list
+			existingSelect.innerHTML =
+				`<option value="">— Existing courses —</option>` +
+				Object.keys(courses)
+					.map((c) => `<option value="${c}">${c}</option>`)
+					.join("");
+			rerenderSchedule();
+		} catch (e) {
+			alert("Invalid JSON.");
+		}
+	});
+}
+
+function rerenderSchedule() {
+	// remove previous render
+	document.querySelectorAll(".table, .alt").forEach((el) => el.remove());
+
+	// re-run your schedule + conflicts
+	drawSchedule();
+	if (typeof updateConflicts === "function") updateConflicts();
+}
+
+// Mount the form after your initial render:
+mountCourseForm();
 
 drawSchedule();
 updateConflicts();
