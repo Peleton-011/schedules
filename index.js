@@ -39,7 +39,8 @@ const initialCourses = {
 const courses = {};
 
 try {
-	localStorage.setItem("courses", JSON.stringify(initialCourses));
+	const saved = localStorage.getItem("courses");
+	if (!saved) localStorage.setItem("courses", JSON.stringify(initialCourses));
 } catch {}
 
 try {
@@ -666,7 +667,10 @@ function mountCourseForm() {
 
 	host.querySelector("#cf-delete").addEventListener("click", () => {
 		const name = nameInput.value.trim();
-		if (!name) return;
+		if (!name) {
+			alert("Course not entered.");
+			return;
+		}
 		if (!courses[name]) {
 			alert("Course not found.");
 			return;
@@ -710,6 +714,14 @@ function mountCourseForm() {
 			alert("Invalid JSON.");
 		}
 	});
+	try {
+		const saved = localStorage.getItem("courses");
+		if (saved) {
+			const parsed = JSON.parse(saved);
+			if (parsed && typeof parsed === "object")
+				Object.assign(courses, parsed);
+		}
+	} catch {}
 }
 
 function rerenderSchedule() {
