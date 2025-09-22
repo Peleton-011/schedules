@@ -257,7 +257,7 @@ function drawSchedule() {
 				courseTimeEndPercentile - courseTimeStartPercentile;
 
 			const courseDiv = document.createElement("div");
-			courseDiv.classList.add("course", courseName);
+			courseDiv.classList.add("course", toValidClassName(courseName));
 			courseDiv.style.position = "absolute";
 			courseDiv.style.top = `${courseTimeStartPercentile}%`;
 			courseDiv.style.left = `${courseDayPercentile}%`;
@@ -291,7 +291,7 @@ function drawSchedule() {
 
 		const toggle = document.createElement("input");
 		toggle.addEventListener("change", () => {
-			const courseDivs = document.getElementsByClassName(courseName);
+			const courseDivs = document.getElementsByClassName(toValidClassName(courseName));
 			if (toggle.checked) {
 				Array.from(courseDivs).map(
 					(div) => (div.style.display = "block")
