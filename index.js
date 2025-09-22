@@ -170,7 +170,7 @@ function drawSchedule() {
 		const row = document.createElement("div");
 		row.classList.add("row");
 		row.style.position = "absolute";
-		row.style.top = `calc(${percentileTimes[i]}% - 0.5rem)`;
+		row.style.top = `${percentileTimes[i]}%`;
 		row.style.left = "0"; // <-- was "-3rem"
 		row.style.width = "100%";
 		table.appendChild(row);
@@ -192,7 +192,7 @@ function drawSchedule() {
 		line.classList.add("hline");
 		line.style.position = "relative";
 		line.style.left = "0"; // <-- was "3rem"
-		line.style.top = "-0.6rem";
+		line.style.top = "0";
 		row.appendChild(line);
 	}
 
@@ -744,6 +744,14 @@ function mountCourseForm() {
 				Object.assign(courses, parsed);
 		}
 	} catch {}
+}
+
+function toValidClassName (str) {
+    return str.replace(/[^a-zA-Z0-9]/g, '-');
+}
+
+function fromValidClassName (str) {
+    return str.replace(/-/g, ' ');
 }
 
 function rerenderSchedule() {
