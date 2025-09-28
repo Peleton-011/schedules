@@ -1,82 +1,214 @@
-:root{
-  --time-col: 4.5rem;   /* left gutter for time labels */
-  --day-head: 2.2rem;   /* top gutter for day labels  */
+:root {
+	--time-col: 4.5rem; /* left gutter for time labels */
+	--day-head: 2.2rem; /* top gutter for day labels  */
 }
 
 /* TABLE */
 .table {
-  height: 520px;
-  width: min(1100px, 90vw);
-  margin: var(--time-col) auto 32px var(--time-col);
-  position: relative;
-  border: 1px solid #111;
-  border-radius: 10px;
-  background: #fff;
-  /* the important part: space for labels */
-  padding: var(--day-head) 0 0 var(--time-col);
-  box-sizing: border-box;
-  overflow: visible;
+	height: 520px;
+	width: min(1100px, 90vw);
+	margin: var(--time-col) auto 32px var(--time-col);
+	position: relative;
+	border: 1px solid #111;
+	border-radius: 10px;
+	background: #fff;
+	/* the important part: space for labels */
+	padding: var(--day-head) 0 0 var(--time-col);
+	box-sizing: border-box;
+	overflow: visible;
 }
 
 /* AUX PANELS */
 .alt {
-  width: min(1100px, 90vw);
-  margin: 16px auto 0;
-  display: flex;
-  gap: 2rem;
+	width: min(1100px, 90vw);
+	margin: 16px auto 0;
+	display: flex;
+	gap: 2rem;
 }
 
-.toggles, .conflicts, .combinations {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-width: 10rem;
+.toggles,
+.conflicts,
+.combinations {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	min-width: 10rem;
 }
 
 /* LINES */
 .hline {
-  height: 1px;
-  width: 100%;
-  border-bottom: 1px dashed rgba(0,0,0,.35);
+	height: 1px;
+	width: 100%;
+	border-bottom: 1px dashed rgba(0, 0, 0, 0.35);
 }
 
 .vline {
-  height: 100%;
-  width: 1px;
-  border-right: 1px dashed rgba(0,0,0,.35);
+	height: 100%;
+	width: 1px;
+	border-right: 1px dashed rgba(0, 0, 0, 0.35);
 }
 
 /* ROWS */
-.row { pointer-events: none; }
+.row {
+	pointer-events: none;
+}
 .row .cell {
-  pointer-events: none;
-  font: 12px/1.2 system-ui, sans-serif;
-  color: #333;
+	pointer-events: none;
+	font: 12px/1.2 system-ui, sans-serif;
+	color: #333;
 }
 
 /* COURSE BLOCKS */
-.course{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font: 600 12px/1.1 system-ui, sans-serif;
-  color: #111;
-  padding: 2px 4px;
-  box-shadow: 0 1px 0 rgba(0,0,0,.1);
-  border: 1px solid rgba(0,0,0,.15);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  box-sizing: border-box;   /* include border in width */
+.course {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	font: 600 12px/1.1 system-ui, sans-serif;
+	color: #111;
+	padding: 2px 4px;
+	box-shadow: 0 1px 0 rgba(0, 0, 0, 0.1);
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	box-sizing: border-box; /* include border in width */
 }
 
 .course .info {
-  font-size: 10px;
-  font-weight: normal;
-  color: #444;
-  margin-top: 2px;
+	font-size: 10px;
+	font-weight: normal;
+	color: #444;
+	margin-top: 2px;
 }
 
+/* //INPUTS */
 
+.time-field {
+	border: 0;
+	padding: 0;
+	margin: 0;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	font: 14px/1.2 system-ui, sans-serif;
+}
+
+.time-colon {
+	opacity: 0.7;
+}
+
+.combo {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+}
+
+.combo input {
+	width: 3.2ch; /* HH / MM */
+	text-align: center;
+	padding: 0.28rem 0.35rem;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	font: inherit;
+}
+
+.combo-btn {
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	padding: 0.2rem 0.35rem;
+	background: #f7f7f7;
+	cursor: pointer;
+}
+
+.combo-btn:hover {
+	background: #eee;
+}
+
+.combo-list {
+	position: absolute;
+	z-index: 10;
+	top: 100%;
+	left: 0;
+	min-width: 100%;
+	margin: 0.25rem 0 0;
+	padding: 0.25rem 0;
+	list-style: none;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+	max-height: 180px;
+	overflow: auto;
+}
+
+.combo-opt {
+	padding: 0.35rem 0.5rem;
+	cursor: pointer;
+}
+
+.combo-opt:hover,
+.combo-opt.is-active {
+	background: #f0f6ff;
+}
+
+.time-input {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	border: 0;
+	padding: 0;
+}
+.time-input input {
+	width: 3ch; /* HH / MM */
+	padding: 0.25rem 0.35rem;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	text-align: center;
+	font: 14px/1.2 system-ui, sans-serif;
+}
+.time-input input:invalid {
+	border-color: #d33;
+	outline: none;
+}
+
+fieldset {
+	display: flex;
+}
+
+.time-input {
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  align-items: center;
+  gap: .25rem;
+  border: 1px solid #c9ccd1;
+  border-radius: 8px;
+  padding: .6rem .6rem .55rem .6rem; /* top gives room for legend overlap */
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.time-input legend {
+  position: absolute;
+  top: -0.65rem;
+  left: .6rem;
+  padding: 0 .35rem;
+  font: 600 .75rem/1.1 system-ui, sans-serif;
+  color: #374151;
+  background: #fff;              /* mask the border under the legend */
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.time-input input {
+  width: 3ch;                    /* HH / MM */
+  text-align: center;
+  padding: .3rem .35rem;
+  border: 1px solid #c9ccd1;
+  border-radius: 6px;
+  font: 14px/1.2 system-ui, sans-serif;
+}

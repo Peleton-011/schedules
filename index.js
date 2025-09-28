@@ -56,23 +56,40 @@ const days = ["seg", "ter", "qua", "qui", "sex"];
 
 // TIMES vv
 
-const times = [
-	"08:30",
-	"10:00",
-	"11:30",
-	"13:00",
-	"13:30",
-	"15:00",
-	"16:30",
-	"18:00",
-	"19:30",
-];
+function getTimes(courses) {
+	const times = [];
+	function addTime(time) {
+		if (!times.includes(time)) times.push(time);
+	}
+	for (const courseName in courses) {
+		const course = courses[courseName];
+		for (const day in course) {
+			addTime(course[day].start);
+			addTime(course[day].end);
+		}
+	}
+	return times
+		.map(normalizeTime)
+		.map(timeToNumber)
+		.sort((a, b) => a - b)
+		.map(numberToTime);
+}
+
+const times = getTimes(courses);
+
+// console.log(times);
 
 function normalizeTime(time) {
 	return {
 		hours: Number(time.split(":")[0]),
 		minutes: Number(time.split(":")[1]),
 	};
+}
+
+function denormalizeTime(time) {
+	return `${time.hours.toString().padStart(2, "0")}:${time.minutes
+		.toString()
+		.padStart(2, "0")}`;
 }
 
 function timeToNumber(time) {
@@ -85,12 +102,6 @@ function numberToTime(time) {
 		minutes: Math.round((time - Math.floor(time)) * 60),
 	};
 }
-
-const normalizedTimes = times
-	.map(normalizeTime)
-	.map(timeToNumber)
-	.sort((a, b) => a - b)
-	.map(numberToTime);
 
 function timesToPercentile(times) {
 	const percentileTimes = times
@@ -163,10 +174,10 @@ function drawSchedule() {
 	table.classList.add("table");
 	body.appendChild(table);
 
-	const percentileTimes = timesToPercentile(normalizedTimes);
+	const percentileTimes = timesToPercentile(times);
 
 	// Time Marks
-	for (let i = 0; i < normalizedTimes.length; i++) {
+	for (let i = 0; i < times.length; i++) {
 		const row = document.createElement("div");
 		row.classList.add("row");
 		row.style.position = "absolute";
@@ -178,15 +189,15 @@ function drawSchedule() {
 		const cell = document.createElement("div");
 		cell.classList.add("cell");
 		// pad minutes to 2 digits
-		const h = normalizedTimes[i].hours.toString().padStart(2, "0");
-		const m = normalizedTimes[i].minutes.toString().padStart(2, "0");
+		const h = times[i].hours.toString().padStart(2, "0");
+		const m = times[i].minutes.toString().padStart(2, "0");
 		cell.textContent = `${h}:${m}`;
 		// place the label into the left gutter
 		cell.style.position = "absolute";
 		cell.style.left = `calc(-1 * var(--time-col) + 0.25rem)`;
 		row.appendChild(cell);
 
-		if (i == 0 || i == normalizedTimes.length - 1) continue;
+		if (i == 0 || i == times.length - 1) continue;
 
 		const line = document.createElement("div");
 		line.classList.add("hline");
@@ -237,17 +248,17 @@ function drawSchedule() {
 			const courseTime = course[day];
 
 			const courseTimeStart = times.findIndex(
-				(time) => time == courseTime.start
+				(time) => denormalizeTime(time) == courseTime.start
 			);
 			const courseTimeEnd = times.findIndex(
-				(time) => time == courseTime.end
+				(time) => denormalizeTime(time) == courseTime.end
 			);
 
 			const courseTimeStartPercentile = parseFloat(
-				timesToPercentile(normalizedTimes)[courseTimeStart]
+				timesToPercentile(times)[courseTimeStart]
 			);
 			const courseTimeEndPercentile = parseFloat(
-				timesToPercentile(normalizedTimes)[courseTimeEnd]
+				timesToPercentile(times)[courseTimeEnd]
 			);
 
 			const courseDayIndex = days.findIndex((currday) => currday == day);
@@ -269,10 +280,10 @@ function drawSchedule() {
 			const courseNameDiv = document.createElement("div");
 			courseNameDiv.textContent = courseName;
 			courseDiv.appendChild(courseNameDiv);
-            console.log(course[day])
+			// console.log(course[day]);
 			if (course[day].info) {
 				const courseInfoDiv = document.createElement("div");
-                courseInfoDiv.classList.add("info");
+				courseInfoDiv.classList.add("info");
 				courseInfoDiv.textContent = course[day].info;
 				courseDiv.appendChild(courseInfoDiv);
 			}
@@ -291,7 +302,9 @@ function drawSchedule() {
 
 		const toggle = document.createElement("input");
 		toggle.addEventListener("change", () => {
-			const courseDivs = document.getElementsByClassName(toValidClassName(courseName));
+			const courseDivs = document.getElementsByClassName(
+				toValidClassName(courseName)
+			);
 			if (toggle.checked) {
 				Array.from(courseDivs).map(
 					(div) => (div.style.display = "block")
@@ -344,7 +357,7 @@ function drawSchedule() {
 
 		const radioBtn = document.createElement("input");
 		radioBtn.addEventListener("change", () => {
-			console.log("changed!");
+			// console.log("changed!");
 			const allToggles = document.querySelectorAll(
 				"div.toggles > div.group > input[type='checkbox']"
 			);
@@ -585,6 +598,152 @@ function mountCourseForm() {
 		return sel;
 	}
 
+	function makeTimeSelect(
+		argHourOptions,
+		argMinuteOptions,
+		argHourValue,
+		argMinuteValue,
+		name
+	) {
+		const hourOptions =
+			argHourOptions ||
+			new Array(16).fill(0).map((_, i) => String(i + 8).padStart(2, "0"));
+		const minuteOptions =
+			argMinuteOptions ||
+			[0, 15, 30, 45].map((i) => String(i).padStart(2, "0"));
+		const hourValue = argHourValue || "08";
+		const minuteValue = argMinuteValue || "30";
+
+		const timeSelect = document.createElement("fieldset");
+		const label = document.createElement("label");
+		label.textContent = name;
+		const hourSelect = makeSelect(hourOptions, hourValue);
+		const minuteSelect = makeSelect(minuteOptions, minuteValue);
+		timeSelect.appendChild(label);
+		timeSelect.appendChild(hourSelect);
+		timeSelect.appendChild(minuteSelect);
+		return timeSelect;
+	}
+
+	let __timeInputCounter = 0;
+
+	// tiny util
+	const pad2 = (n) => String(n).padStart(2, "0");
+
+	function makeTimeInput(
+		hourOptions = [],
+		minuteOptions = ["00", "15", "30", "45"],
+		hourValue = "08",
+		minuteValue = "30",
+		name = "time"
+	) {
+		const uid = `${name}-${__timeInputCounter++}`;
+		const pad2 = (n) => String(n).padStart(2, "0");
+
+		// container
+		const fs = document.createElement("fieldset");
+		fs.className = "time-input";
+		fs.role = "group";
+		fs.ariaLabel = name;
+
+		// legend
+		const l = document.createElement("legend");
+		l.textContent = name.slice(0, 1).toUpperCase() + name.slice(1);
+
+		// labels
+		const lh = document.createElement("label");
+		lh.setAttribute("for", `${uid}-hour`);
+		lh.textContent = "Hour";
+		lh.style.display = "none"; // visually hidden; keep for a11y
+
+		const lm = document.createElement("label");
+		lm.setAttribute("for", `${uid}-minute`);
+		lm.textContent = "Minute";
+		lm.style.display = "none";
+
+		// inputs (text + inputmode so mobile shows numeric keypad)
+		const hour = document.createElement("input");
+		hour.type = "text";
+		hour.id = `${uid}-hour`;
+		hour.inputMode = "numeric";
+		hour.autocomplete = "off";
+		hour.maxLength = 2;
+		hour.pattern = "^(0\\d|1\\d|2[0-3])$"; // 00-23
+		hour.placeholder = pad2(hourValue);
+
+		const minute = document.createElement("input");
+		minute.type = "text";
+		minute.id = `${uid}-minute`;
+		minute.inputMode = "numeric";
+		minute.autocomplete = "off";
+		minute.maxLength = 2;
+		// 00,15,30,45 (change if you want any minute: ^([0-5]\\d)$)
+		minute.pattern = "^(00|15|30|45)$";
+		minute.placeholder = pad2(minuteValue);
+
+		// datalists (optional hints)
+		const hourListId = `${uid}-houropts`;
+		const minListId = `${uid}-minuteopts`;
+		const hourDL = document.createElement("datalist");
+		hourDL.id = hourListId;
+		hourDL.innerHTML = Array.from(new Set(hourOptions))
+			.sort((a, b) => a - b)
+			.map((h) => `<option value="${pad2(h)}"></option>`)
+			.join("");
+
+		const minDL = document.createElement("datalist");
+		minDL.id = minListId;
+		minDL.innerHTML = minuteOptions
+			.map((m) => `<option value="${pad2(m)}"></option>`)
+			.join("");
+
+		hour.setAttribute("list", hourListId);
+		minute.setAttribute("list", minListId);
+
+		// normalize & validate on blur
+		function clampHour() {
+			const v = hour.value.replace(/\D/g, "");
+			const n = Math.max(0, Math.min(23, Number(v)));
+			hour.value = pad2(isFinite(n) ? n : 0);
+		}
+		function snapMinute() {
+			let v = minute.value.replace(/\D/g, "");
+			if (!v) v = "0";
+			let n = Math.max(0, Math.min(59, Number(v)));
+			// snap to nearest 15
+			n = Math.round(n / 15) * 15;
+			if (n === 60) n = 45;
+			minute.value = pad2(n);
+		}
+		hour.addEventListener("blur", clampHour);
+		minute.addEventListener("blur", snapMinute);
+
+		// expose a helper to get/set combined value
+		fs.getValue = () => `${pad2(hour.value)}:${pad2(minute.value)}`;
+		fs.setValue = (hhmm) => {
+			const [h, m] = (hhmm || "").split(":");
+			if (h != null) hour.value = pad2(h);
+			if (m != null) minute.value = pad2(m);
+		};
+
+		// layout (simple inline)
+		const colon = document.createElement("span");
+		colon.textContent = " : ";
+		colon.ariaHidden = "true";
+		colon.style.padding = "0 .25rem";
+
+		fs.appendChild(l);
+		fs.appendChild(lh);
+		fs.appendChild(hourDL);
+		fs.appendChild(hour);
+		fs.appendChild(colon);
+		fs.appendChild(lm);
+		fs.appendChild(minDL);
+		fs.appendChild(minute);
+
+		return fs;
+	}
+
 	function addRow(init = { day: days[0], start: times[0], end: times[1] }) {
 		const row = document.createElement("div");
 		row.style.display = "grid";
@@ -593,14 +752,41 @@ function mountCourseForm() {
 		row.style.gap = ".5rem";
 
 		const daySel = makeSelect(days, init.day);
-		const startSel = makeSelect(times, init.start);
-		const endSel = makeSelect(times, init.end);
-        const infoInput = document.createElement("input");
-        infoInput.type = "text";
-        infoInput.placeholder = "Info";
-        infoInput.style.padding = ".3rem .5rem";
-        infoInput.style.border = "1px solid #ccc";
-        infoInput.style.borderRadius = "6px";
+
+		const hourOptions = Array.from(
+			new Set(times.map((t) => pad2(String(t.hours))))
+		);
+		const minuteOptions = ["00", "15", "30", "45"];
+
+		const startInput = makeTimeInput(
+			hourOptions,
+			minuteOptions,
+			"08",
+			"30",
+			"start"
+		);
+		const endInput = makeTimeInput(
+			hourOptions,
+			minuteOptions,
+			"10",
+			"00",
+			"end"
+		);
+
+		const startSel = makeTimeSelect(null, null, null, null, "Start");
+		const endSel = makeTimeSelect(
+			new Array(4).fill(0).map((_, i) => String(i).padStart(2, "0")),
+			null,
+			"01",
+			null,
+			"Duration"
+		);
+		const infoInput = document.createElement("input");
+		infoInput.type = "text";
+		infoInput.placeholder = "Info";
+		infoInput.style.padding = ".3rem .5rem";
+		infoInput.style.border = "1px solid #ccc";
+		infoInput.style.borderRadius = "6px";
 		const del = document.createElement("button");
 		del.type = "button";
 		del.textContent = "✕";
@@ -613,9 +799,9 @@ function mountCourseForm() {
 		del.addEventListener("click", () => row.remove());
 
 		row.appendChild(daySel);
-		row.appendChild(startSel);
-		row.appendChild(endSel);
-        row.appendChild(infoInput);
+		row.appendChild(startInput);
+		row.appendChild(endInput);
+		row.appendChild(infoInput);
 		row.appendChild(del);
 		rowsHost.appendChild(row);
 	}
@@ -651,18 +837,38 @@ function mountCourseForm() {
 			return;
 		}
 
+		function inputsToTime(h, m) {
+			const hour = String(h).padStart(2, "0");
+			const minute = String(m).padStart(2, "0");
+			return `${hour}:${minute}`;
+		}
+
 		// Build the course entry { day: {start, end}, ... }
 		const entry = {};
 		for (const row of rows) {
-			const [daySel, startSel, endSel] = row.querySelectorAll("select");
+			const [daySel, startSelHour, startSelMin, endSelHour, endSelMin] =
+				row.querySelectorAll("select");
 			const day = daySel.value;
-			const start = startSel.value;
-			const end = endSel.value;
-            const info = row.querySelector("input").value;
+			const start = inputsToTime(startSelHour.value, startSelMin.value);
+			const end = denormalizeTime(
+				numberToTime(
+					timeToNumber(normalizeTime(start)) +
+						timeToNumber(
+							normalizeTime(
+								inputsToTime(endSelHour.value, endSelMin.value)
+							)
+						)
+				)
+			);
+			alert(start + ", " + end);
+			const info = row.querySelector("input").value;
 
 			// Validate ordering
 			const startIdx = times.indexOf(start);
 			const endIdx = times.indexOf(end);
+			alert(times);
+			alert(startIdx + ", " + endIdx);
+
 			if (startIdx === -1 || endIdx === -1) {
 				alert("Invalid time selected.");
 				return;
@@ -746,12 +952,12 @@ function mountCourseForm() {
 	} catch {}
 }
 
-function toValidClassName (str) {
-    return str.replace(/[^a-zA-Z0-9]/g, '-');
+function toValidClassName(str) {
+	return str.replace(/[^a-zA-Z0-9]/g, "-");
 }
 
-function fromValidClassName (str) {
-    return str.replace(/-/g, ' ');
+function fromValidClassName(str) {
+	return str.replace(/-/g, " ");
 }
 
 function rerenderSchedule() {
