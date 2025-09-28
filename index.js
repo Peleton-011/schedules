@@ -75,7 +75,7 @@ function getTimes(courses) {
 		.map(numberToTime);
 }
 
-const times = getTimes(courses);
+let times = getTimes(courses);
 
 // console.log(times);
 
@@ -164,7 +164,7 @@ function hslToHex(h, s, l) {
 	return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
-const courseColors = generateDistinctColors(Object.keys(courses).length);
+let courseColors = generateDistinctColors(Object.keys(courses).length);
 
 // COLORS ^^
 
@@ -598,33 +598,6 @@ function mountCourseForm() {
 		return sel;
 	}
 
-	function makeTimeSelect(
-		argHourOptions,
-		argMinuteOptions,
-		argHourValue,
-		argMinuteValue,
-		name
-	) {
-		const hourOptions =
-			argHourOptions ||
-			new Array(16).fill(0).map((_, i) => String(i + 8).padStart(2, "0"));
-		const minuteOptions =
-			argMinuteOptions ||
-			[0, 15, 30, 45].map((i) => String(i).padStart(2, "0"));
-		const hourValue = argHourValue || "08";
-		const minuteValue = argMinuteValue || "30";
-
-		const timeSelect = document.createElement("fieldset");
-		const label = document.createElement("label");
-		label.textContent = name;
-		const hourSelect = makeSelect(hourOptions, hourValue);
-		const minuteSelect = makeSelect(minuteOptions, minuteValue);
-		timeSelect.appendChild(label);
-		timeSelect.appendChild(hourSelect);
-		timeSelect.appendChild(minuteSelect);
-		return timeSelect;
-	}
-
 	let __timeInputCounter = 0;
 
 	// tiny util
@@ -642,7 +615,7 @@ function mountCourseForm() {
 
 		// container
 		const fs = document.createElement("fieldset");
-		fs.className = "time-input";
+		fs.className = "time-input inline";
 		fs.role = "group";
 		fs.ariaLabel = name;
 
@@ -773,14 +746,6 @@ function mountCourseForm() {
 			"end"
 		);
 
-		const startSel = makeTimeSelect(null, null, null, null, "Start");
-		const endSel = makeTimeSelect(
-			new Array(4).fill(0).map((_, i) => String(i).padStart(2, "0")),
-			null,
-			"01",
-			null,
-			"Duration"
-		);
 		const infoInput = document.createElement("input");
 		infoInput.type = "text";
 		infoInput.placeholder = "Info";
@@ -846,34 +811,16 @@ function mountCourseForm() {
 		// Build the course entry { day: {start, end}, ... }
 		const entry = {};
 		for (const row of rows) {
-			const [daySel, startSelHour, startSelMin, endSelHour, endSelMin] =
-				row.querySelectorAll("select");
+			const daySel = row.querySelector("select");
+			const [startSelHour, startSelMin, endSelHour, endSelMin, info] =
+				row.querySelectorAll("fieldset input");
+
 			const day = daySel.value;
 			const start = inputsToTime(startSelHour.value, startSelMin.value);
-			const end = denormalizeTime(
-				numberToTime(
-					timeToNumber(normalizeTime(start)) +
-						timeToNumber(
-							normalizeTime(
-								inputsToTime(endSelHour.value, endSelMin.value)
-							)
-						)
-				)
-			);
-			alert(start + ", " + end);
-			const info = row.querySelector("input").value;
+			const end = inputsToTime(endSelHour.value, endSelMin.value);
 
-			// Validate ordering
-			const startIdx = times.indexOf(start);
-			const endIdx = times.indexOf(end);
-			alert(times);
-			alert(startIdx + ", " + endIdx);
-
-			if (startIdx === -1 || endIdx === -1) {
-				alert("Invalid time selected.");
-				return;
-			}
-			if (endIdx <= startIdx) {
+			// Validate time order
+			if (timeToNumber(start) >= timeToNumber(end)) {
 				alert(`End must be after start for ${day}.`);
 				return;
 			}
@@ -883,6 +830,8 @@ function mountCourseForm() {
 
 		// Merge into courses
 		courses[name] = entry;
+
+		times = getTimes(courses);
 
 		// Persist (optional)
 		try {
@@ -961,6 +910,8 @@ function fromValidClassName(str) {
 }
 
 function rerenderSchedule() {
+	courseColors = generateDistinctColors(Object.keys(courses).length);
+
 	// remove previous render
 	document.querySelectorAll(".table, .alt").forEach((el) => el.remove());
 
