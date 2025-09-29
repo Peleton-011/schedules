@@ -545,15 +545,27 @@ function mountCourseForm() {
 	host.style.fontFamily = "system-ui, sans-serif";
 
 	function makeCourseForm(courses) {
-		const host = document.createElement("div");
+		const host = document.createElement("details");
 		host.className = "course-form";
 
+        // Summary
+        const formSummary = document.createElement("summary");
+        
 		// Title
 		const h3 = document.createElement("h3");
 		h3.textContent = "Add / Edit Course";
-		h3.style.margin = "0 0 .5rem 0";
-		host.appendChild(h3);
+		h3.style.margin = "0 0 1rem 0";
+		formSummary.appendChild(h3);
 
+        // Icon
+
+        const icon = document.createElement("span");
+        icon.className = "icon";
+        icon.textContent = "👇";
+        formSummary.appendChild(icon);
+
+        host.appendChild(formSummary);
+        
 		// Row: label + input
 		const nameRow = document.createElement("div");
 		Object.assign(nameRow.style, {
@@ -563,23 +575,25 @@ function mountCourseForm() {
 			flexWrap: "wrap",
 		});
 
-		const nameLabel = document.createElement("label");
-		nameLabel.textContent = "Course name";
-		nameLabel.style.minWidth = "7rem";
+		const nameLabel = makeLegendFieldset("Course name");
 
-		const nameInput = document.createElement("input");
-		nameInput.id = "cf-name";
-		nameInput.type = "text";
-		nameInput.placeholder = "e.g. Metafisica";
-		Object.assign(nameInput.style, {
+		const rawNameInput = document.createElement("input");
+		rawNameInput.id = "cf-name";
+		rawNameInput.type = "text";
+		rawNameInput.placeholder = "e.g. Metafisica";
+		Object.assign(rawNameInput.style, {
 			flex: "1",
 			padding: ".4rem .6rem",
 			border: "1px solid #ccc",
 			borderRadius: "6px",
+			width: "100%",
+			textAlign: "left",
 		});
 
+		nameLabel.appendChild(rawNameInput);
+		nameLabel.style.width = "100%";
+		nameLabel.style.display = "flex";
 		nameRow.appendChild(nameLabel);
-		nameRow.appendChild(nameInput);
 		host.appendChild(nameRow);
 
 		// Container for dynamic rows
@@ -895,9 +909,9 @@ function mountCourseForm() {
 		rawInfoInput.placeholder = "Info";
 		rawInfoInput.style.padding = ".3rem .5rem";
 		rawInfoInput.style.border = "1px solid #ccc";
-        rawInfoInput.style.width = "100%";
-        rawInfoInput.style.boxSizing = "border-box";
-        rawInfoInput.style.textAlign = "left";
+		rawInfoInput.style.width = "100%";
+		rawInfoInput.style.boxSizing = "border-box";
+		rawInfoInput.style.textAlign = "left";
 		rawInfoInput.style.borderRadius = "6px";
 
 		infoInput.appendChild(rawInfoInput);
