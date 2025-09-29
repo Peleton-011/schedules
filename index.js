@@ -168,11 +168,10 @@ let courseColors = generateDistinctColors(Object.keys(courses).length);
 
 // COLORS ^^
 
-function drawSchedule() {
+function generateSchedule() {
 	const table = document.createElement("div");
 
 	table.classList.add("table");
-	body.appendChild(table);
 
 	const percentileTimes = timesToPercentile(times);
 
@@ -291,6 +290,10 @@ function drawSchedule() {
 		}
 	}
 
+	return table;
+}
+
+function generateAltSection() {
 	// Toggles
 
 	const toggles = document.createElement("div");
@@ -400,7 +403,7 @@ function drawSchedule() {
 	alt.appendChild(toggles);
 	alt.appendChild(conflictsDiv);
 	alt.appendChild(combinationsElem);
-	body.appendChild(alt);
+	return alt;
 }
 
 function findConflicts(courses) {
@@ -530,10 +533,6 @@ function findAllCombinations(courses, courseAmount = 5) {
 
 // Course input
 
-// === Simple Course Input UI ===
-// Assumes you already have: `const days = [...]`, `const times = [...]`, `const courses = {...}`
-// and your drawSchedule() + updateConflicts() functions.
-
 function mountCourseForm() {
 	const host = document.createElement("div");
 	host.className = "course-form";
@@ -548,24 +547,24 @@ function mountCourseForm() {
 		const host = document.createElement("details");
 		host.className = "course-form";
 
-        // Summary
-        const formSummary = document.createElement("summary");
-        
+		// Summary
+		const formSummary = document.createElement("summary");
+
 		// Title
 		const h3 = document.createElement("h3");
 		h3.textContent = "Add / Edit Course";
 		h3.style.margin = "0 0 1rem 0";
 		formSummary.appendChild(h3);
 
-        // Icon
+		// Icon
 
-        const icon = document.createElement("span");
-        icon.className = "icon";
-        icon.textContent = "👇";
-        formSummary.appendChild(icon);
+		const icon = document.createElement("span");
+		icon.className = "icon";
+		icon.textContent = "👇";
+		formSummary.appendChild(icon);
 
-        host.appendChild(formSummary);
-        
+		host.appendChild(formSummary);
+
 		// Row: label + input
 		const nameRow = document.createElement("div");
 		Object.assign(nameRow.style, {
@@ -723,7 +722,6 @@ function mountCourseForm() {
 	}
 
 	host.appendChild(makeCourseForm(courses));
-	document.body.appendChild(host);
 
 	const rowsHost = host.querySelector("#cf-rows");
 	const nameInput = host.querySelector("#cf-name");
@@ -1063,6 +1061,8 @@ function mountCourseForm() {
 				Object.assign(courses, parsed);
 		}
 	} catch {}
+
+	return host;
 }
 
 function toValidClassName(str) {
@@ -1080,12 +1080,19 @@ function rerenderSchedule() {
 	document.querySelectorAll(".table, .alt").forEach((el) => el.remove());
 
 	// re-run your schedule + conflicts
-	drawSchedule();
+	render();
 	if (typeof updateConflicts === "function") updateConflicts();
 }
 
-// Mount the form after your initial render:
-mountCourseForm();
+function render() {
+	const main = document.createElement("main");
+	const schedule = generateSchedule();
+	const alt = generateAltSection();
+	const form = mountCourseForm();
 
-drawSchedule();
+	main.append(form, schedule);
+	body.append(main, alt);
+}
+
+render();
 updateConflicts();
