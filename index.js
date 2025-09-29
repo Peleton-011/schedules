@@ -541,6 +541,7 @@ function mountCourseForm() {
 	host.style.border = "1px solid #ddd";
 	host.style.borderRadius = "8px";
 	host.style.maxWidth = "640px";
+	host.style.width = "100%";
 	host.style.fontFamily = "system-ui, sans-serif";
 
 	function makeCourseForm(courses) {
@@ -560,7 +561,7 @@ function mountCourseForm() {
 
 		const icon = document.createElement("span");
 		icon.className = "icon";
-		icon.textContent = "👇";
+		icon.textContent = "➕";
 		formSummary.appendChild(icon);
 
 		host.appendChild(formSummary);
@@ -685,6 +686,7 @@ function mountCourseForm() {
 		details.style.marginTop = ".75rem";
 
 		const summary = document.createElement("summary");
+		summary.style.display = "default";
 		summary.textContent = "Import / Export JSON";
 
 		const exportRow = document.createElement("div");
@@ -1090,7 +1092,10 @@ function render() {
 	const alt = generateAltSection();
 	const form = mountCourseForm();
 
-	main.append(form, schedule);
+    const title = document.createElement("h1");
+    title.textContent = "My Schedule 🗓️";
+
+	main.append(title, schedule, form);
 	body.append(main, alt);
 }
 
