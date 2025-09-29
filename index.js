@@ -765,9 +765,11 @@ function mountCourseForm() {
 	function makeTimeInput(
 		hourOptions = [],
 		minuteOptions = ["00", "15", "30", "45"],
-		hourValue = "08",
-		minuteValue = "30",
-		name = "time"
+		hourPlaceholder = "08",
+		minutePlaceholder = "30",
+		name = "time",
+		hourValue,
+		minuteValue
 	) {
 		const uid = `${name}-${__timeInputCounter++}`;
 
@@ -792,7 +794,8 @@ function mountCourseForm() {
 		hour.autocomplete = "off";
 		hour.maxLength = 2;
 		hour.pattern = "^(0\\d|1\\d|2[0-3])$"; // 00-23
-		hour.placeholder = pad2(hourValue);
+		hour.placeholder = pad2(hourPlaceholder);
+		if (hourValue) hour.value = hourValue;
 
 		const minute = document.createElement("input");
 		minute.type = "text";
@@ -802,7 +805,8 @@ function mountCourseForm() {
 		minute.maxLength = 2;
 		// 00,15,30,45 (change if you want any minute: ^([0-5]\\d)$)
 		minute.pattern = "^(00|15|30|45)$";
-		minute.placeholder = pad2(minuteValue);
+		minute.placeholder = pad2(minutePlaceholder);
+		if (minuteValue) minute.value = minuteValue;
 
 		// datalists (optional hints)
 		const hourListId = `${uid}-houropts`;
@@ -866,7 +870,7 @@ function mountCourseForm() {
 		return fs;
 	}
 
-	function addRow(init = { day: days[0], start: times[0], end: times[1] }) {
+	function addRow(init = { day: days[0], start: null, end: null }) {
 		const row = document.createElement("div");
 		row.style.display = "grid";
 		row.style.gridTemplateColumns = "120px 1fr 1fr 1fr auto";
@@ -874,7 +878,7 @@ function mountCourseForm() {
 		row.style.gap = ".5rem";
 
 		const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri"].map((d, i) => {
-			console.log(days[i], d, days, i);
+			// console.log(days[i], d, days, i);
 			return `${
 				days[i].slice(0, 1).toUpperCase() + days[i].slice(1)
 			} / ${d}`;
@@ -893,14 +897,18 @@ function mountCourseForm() {
 			minuteOptions,
 			"08",
 			"30",
-			"start"
+			"start",
+			init.start ? pad2(String(init.start.hours)) : null,
+			init.start ? pad2(String(init.start.minutes)) : null
 		);
 		const endInput = makeTimeInput(
 			hourOptions,
 			minuteOptions,
 			"10",
 			"00",
-			"end"
+			"end",
+			init.end ? pad2(String(init.end.hours)) : null,
+			init.end ? pad2(String(init.end.minutes)) : null
 		);
 
 		const infoInput = makeLegendFieldset("Info / Room");
@@ -949,7 +957,11 @@ function mountCourseForm() {
 		rowsHost.innerHTML = "";
 		const course = courses[name];
 		Object.keys(course).forEach((day) => {
-			addRow({ day, start: course[day].start, end: course[day].end });
+			addRow({
+				day,
+				start: normalizeTime(course[day].start),
+				end: normalizeTime(course[day].end),
+			});
 		});
 	});
 
@@ -1079,7 +1091,9 @@ function rerenderSchedule() {
 	courseColors = generateDistinctColors(Object.keys(courses).length);
 
 	// remove previous render
-	document.querySelectorAll("main, .table, .alt").forEach((el) => el.remove());
+	document
+		.querySelectorAll("main, .table, .alt")
+		.forEach((el) => el.remove());
 
 	// re-run your schedule + conflicts
 	render();
@@ -1092,8 +1106,8 @@ function render() {
 	const alt = generateAltSection();
 	const form = mountCourseForm();
 
-    const title = document.createElement("h1");
-    title.textContent = "My Schedule 🗓️";
+	const title = document.createElement("h1");
+	title.textContent = "My Schedule 🗓️";
 
 	main.append(title, schedule, form);
 	body.append(main, alt);
