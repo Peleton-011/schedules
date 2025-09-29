@@ -544,42 +544,171 @@ function mountCourseForm() {
 	host.style.maxWidth = "640px";
 	host.style.fontFamily = "system-ui, sans-serif";
 
-	host.innerHTML = `
-    <h3 style="margin:0 0 .5rem 0;">Add / Edit Course</h3>
-    <div style="display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;">
-      <label style="min-width:7rem;">Course name</label>
-      <input id="cf-name" type="text" placeholder="e.g. Metafisica" style="flex:1; padding:.4rem .6rem; border:1px solid #ccc; border-radius:6px;" />
-    </div>
+	function makeCourseForm(courses) {
+		const host = document.createElement("div");
+		host.className = "course-form";
 
-    <div id="cf-rows" style="margin-top:.75rem; display:grid; gap:.5rem;"></div>
+		// Title
+		const h3 = document.createElement("h3");
+		h3.textContent = "Add / Edit Course";
+		h3.style.margin = "0 0 .5rem 0";
+		host.appendChild(h3);
 
-    <div style="display:flex; gap:.5rem; margin-top:.5rem;">
-      <button id="cf-add-row" type="button">+ Add day/time</button>
-      <button id="cf-clear-rows" type="button">Clear rows</button>
-      <button id="cf-fill-existing" type="button" title="Load an existing course into the form">Load existing</button>
-      <select id="cf-existing" style="margin-left:auto;">
-        <option value="">— Existing courses —</option>
-        ${Object.keys(courses)
-			.map((c) => `<option value="${c}">${c}</option>`)
-			.join("")}
-      </select>
-    </div>
+		// Row: label + input
+		const nameRow = document.createElement("div");
+		Object.assign(nameRow.style, {
+			display: "flex",
+			gap: ".5rem",
+			alignItems: "center",
+			flexWrap: "wrap",
+		});
 
-    <div style="display:flex; gap:.5rem; margin-top:.75rem;">
-      <button id="cf-save" type="button" style="background:#111;color:#fff;border:none;padding:.5rem .8rem;border-radius:6px;">Save course</button>
-      <button id="cf-delete" type="button" style="margin-left:auto; color:#b00020;">Delete course</button>
-    </div>
+		const nameLabel = document.createElement("label");
+		nameLabel.textContent = "Course name";
+		nameLabel.style.minWidth = "7rem";
 
-    <details style="margin-top:.75rem;">
-      <summary>Import / Export JSON</summary>
-      <div style="display:flex; gap:.5rem; margin-top:.5rem;">
-        <button id="cf-export" type="button">Export</button>
-        <button id="cf-import" type="button">Import</button>
-      </div>
-      <textarea id="cf-json" rows="6" style="width:100%; margin-top:.5rem; font-family:monospace;"></textarea>
-    </details>
-  `;
+		const nameInput = document.createElement("input");
+		nameInput.id = "cf-name";
+		nameInput.type = "text";
+		nameInput.placeholder = "e.g. Metafisica";
+		Object.assign(nameInput.style, {
+			flex: "1",
+			padding: ".4rem .6rem",
+			border: "1px solid #ccc",
+			borderRadius: "6px",
+		});
 
+		nameRow.appendChild(nameLabel);
+		nameRow.appendChild(nameInput);
+		host.appendChild(nameRow);
+
+		// Container for dynamic rows
+		const rows = document.createElement("div");
+		rows.id = "cf-rows";
+		Object.assign(rows.style, {
+			marginTop: ".75rem",
+			display: "grid",
+			gap: ".5rem",
+		});
+		host.appendChild(rows);
+
+		// Row of buttons + select
+		const controlsRow = document.createElement("div");
+		Object.assign(controlsRow.style, {
+			display: "flex",
+			gap: ".5rem",
+			marginTop: ".5rem",
+		});
+
+		const btnAdd = document.createElement("button");
+		btnAdd.id = "cf-add-row";
+		btnAdd.type = "button";
+		btnAdd.textContent = "+ Add day/time";
+
+		const btnClear = document.createElement("button");
+		btnClear.id = "cf-clear-rows";
+		btnClear.type = "button";
+		btnClear.textContent = "Clear rows";
+
+		const btnFill = document.createElement("button");
+		btnFill.id = "cf-fill-existing";
+		btnFill.type = "button";
+		btnFill.title = "Load an existing course into the form";
+		btnFill.textContent = "Load existing";
+
+		const selectExisting = document.createElement("select");
+		selectExisting.id = "cf-existing";
+		selectExisting.style.marginLeft = "auto";
+
+		const optDefault = document.createElement("option");
+		optDefault.value = "";
+		optDefault.textContent = "— Existing courses —";
+		selectExisting.appendChild(optDefault);
+
+		Object.keys(courses).forEach((c) => {
+			const opt = document.createElement("option");
+			opt.value = c;
+			opt.textContent = c;
+			selectExisting.appendChild(opt);
+		});
+
+		controlsRow.append(btnAdd, btnClear, btnFill, selectExisting);
+		host.appendChild(controlsRow);
+
+		// Row of save/delete
+		const saveRow = document.createElement("div");
+		Object.assign(saveRow.style, {
+			display: "flex",
+			gap: ".5rem",
+			marginTop: ".75rem",
+		});
+
+		const btnSave = document.createElement("button");
+		btnSave.id = "cf-save";
+		btnSave.type = "button";
+		btnSave.textContent = "Save course";
+		Object.assign(btnSave.style, {
+			background: "#111",
+			color: "#fff",
+			border: "none",
+			padding: ".5rem .8rem",
+			borderRadius: "6px",
+		});
+
+		const btnDelete = document.createElement("button");
+		btnDelete.id = "cf-delete";
+		btnDelete.type = "button";
+		btnDelete.textContent = "Delete course";
+		Object.assign(btnDelete.style, {
+			marginLeft: "auto",
+			color: "#b00020",
+		});
+
+		saveRow.append(btnSave, btnDelete);
+		host.appendChild(saveRow);
+
+		// Details block
+		const details = document.createElement("details");
+		details.style.marginTop = ".75rem";
+
+		const summary = document.createElement("summary");
+		summary.textContent = "Import / Export JSON";
+
+		const exportRow = document.createElement("div");
+		Object.assign(exportRow.style, {
+			display: "flex",
+			gap: ".5rem",
+			marginTop: ".5rem",
+		});
+
+		const btnExport = document.createElement("button");
+		btnExport.id = "cf-export";
+		btnExport.type = "button";
+		btnExport.textContent = "Export";
+
+		const btnImport = document.createElement("button");
+		btnImport.id = "cf-import";
+		btnImport.type = "button";
+		btnImport.textContent = "Import";
+
+		exportRow.append(btnExport, btnImport);
+
+		const textarea = document.createElement("textarea");
+		textarea.id = "cf-json";
+		textarea.rows = 6;
+		Object.assign(textarea.style, {
+			width: "100%",
+			marginTop: ".5rem",
+			fontFamily: "monospace",
+		});
+
+		details.append(summary, exportRow, textarea);
+		host.appendChild(details);
+
+		return host;
+	}
+
+	host.appendChild(makeCourseForm(courses));
 	document.body.appendChild(host);
 
 	const rowsHost = host.querySelector("#cf-rows");
@@ -730,13 +859,12 @@ function mountCourseForm() {
 		row.style.alignItems = "center";
 		row.style.gap = ".5rem";
 
-		const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri"].map(
-			(d, i) =>
-            {
-                console.log(days[i], d, days, i);
-                return `${days[i].slice(0, 1).toUpperCase() + days[i].slice(1)} / ${d}`
-            }
-		);
+		const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri"].map((d, i) => {
+			console.log(days[i], d, days, i);
+			return `${
+				days[i].slice(0, 1).toUpperCase() + days[i].slice(1)
+			} / ${d}`;
+		});
 
 		const daySel = makeLegendFieldset("Day");
 		daySel.appendChild(makeSelect(days, dayNames, init.day));
@@ -761,12 +889,16 @@ function mountCourseForm() {
 			"end"
 		);
 
-		const infoInput = document.createElement("input");
-		infoInput.type = "text";
-		infoInput.placeholder = "Info";
-		infoInput.style.padding = ".3rem .5rem";
-		infoInput.style.border = "1px solid #ccc";
-		infoInput.style.borderRadius = "6px";
+		const infoInput = makeLegendFieldset("Info / Room");
+		const rawInfoInput = document.createElement("input");
+		rawInfoInput.type = "text";
+		rawInfoInput.placeholder = "Info";
+		rawInfoInput.style.padding = ".3rem .5rem";
+		rawInfoInput.style.border = "1px solid #ccc";
+		rawInfoInput.style.borderRadius = "6px";
+
+		infoInput.appendChild(rawInfoInput);
+
 		const del = document.createElement("button");
 		del.type = "button";
 		del.textContent = "✕";
