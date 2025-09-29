@@ -6,6 +6,7 @@
 body {
 	display: flex;
 	position: relative;
+	font-family: system-ui, sans-serif;
 }
 
 main {
