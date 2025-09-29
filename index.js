@@ -1079,7 +1079,7 @@ function rerenderSchedule() {
 	courseColors = generateDistinctColors(Object.keys(courses).length);
 
 	// remove previous render
-	document.querySelectorAll(".table, .alt").forEach((el) => el.remove());
+	document.querySelectorAll("main, .table, .alt").forEach((el) => el.remove());
 
 	// re-run your schedule + conflicts
 	render();
