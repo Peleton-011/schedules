@@ -895,6 +895,9 @@ function mountCourseForm() {
 		rawInfoInput.placeholder = "Info";
 		rawInfoInput.style.padding = ".3rem .5rem";
 		rawInfoInput.style.border = "1px solid #ccc";
+        rawInfoInput.style.width = "100%";
+        rawInfoInput.style.boxSizing = "border-box";
+        rawInfoInput.style.textAlign = "left";
 		rawInfoInput.style.borderRadius = "6px";
 
 		infoInput.appendChild(rawInfoInput);
