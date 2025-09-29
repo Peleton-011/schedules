@@ -586,10 +586,10 @@ function mountCourseForm() {
 	const nameInput = host.querySelector("#cf-name");
 	const existingSelect = host.querySelector("#cf-existing");
 
-	function makeSelect(options, value) {
+	function makeSelect(options, names, value) {
 		const sel = document.createElement("select");
 		sel.innerHTML = options
-			.map((v) => `<option value="${v}">${v}</option>`)
+			.map((v, i) => `<option value="${v}">${names[i]}</option>`)
 			.join("");
 		if (value) sel.value = value;
 		sel.style.padding = ".3rem .5rem";
@@ -603,16 +603,7 @@ function mountCourseForm() {
 	// tiny util
 	const pad2 = (n) => String(n).padStart(2, "0");
 
-	function makeTimeInput(
-		hourOptions = [],
-		minuteOptions = ["00", "15", "30", "45"],
-		hourValue = "08",
-		minuteValue = "30",
-		name = "time"
-	) {
-		const uid = `${name}-${__timeInputCounter++}`;
-		const pad2 = (n) => String(n).padStart(2, "0");
-
+	function makeLegendFieldset(name) {
 		// container
 		const fs = document.createElement("fieldset");
 		fs.className = "time-input inline";
@@ -622,6 +613,22 @@ function mountCourseForm() {
 		// legend
 		const l = document.createElement("legend");
 		l.textContent = name.slice(0, 1).toUpperCase() + name.slice(1);
+
+		fs.appendChild(l);
+
+		return fs;
+	}
+
+	function makeTimeInput(
+		hourOptions = [],
+		minuteOptions = ["00", "15", "30", "45"],
+		hourValue = "08",
+		minuteValue = "30",
+		name = "time"
+	) {
+		const uid = `${name}-${__timeInputCounter++}`;
+
+		const fs = makeLegendFieldset(name);
 
 		// labels
 		const lh = document.createElement("label");
@@ -705,7 +712,6 @@ function mountCourseForm() {
 		colon.ariaHidden = "true";
 		colon.style.padding = "0 .25rem";
 
-		fs.appendChild(l);
 		fs.appendChild(lh);
 		fs.appendChild(hourDL);
 		fs.appendChild(hour);
@@ -724,7 +730,16 @@ function mountCourseForm() {
 		row.style.alignItems = "center";
 		row.style.gap = ".5rem";
 
-		const daySel = makeSelect(days, init.day);
+		const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri"].map(
+			(d, i) =>
+            {
+                console.log(days[i], d, days, i);
+                return `${days[i].slice(0, 1).toUpperCase() + days[i].slice(1)} / ${d}`
+            }
+		);
+
+		const daySel = makeLegendFieldset("Day");
+		daySel.appendChild(makeSelect(days, dayNames, init.day));
 
 		const hourOptions = Array.from(
 			new Set(times.map((t) => pad2(String(t.hours))))
