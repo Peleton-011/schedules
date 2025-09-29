@@ -870,7 +870,9 @@ function mountCourseForm() {
 		return fs;
 	}
 
-	function addRow(init = { day: days[0], start: null, end: null }) {
+	function addRow(
+		init = { day: days[0], start: null, end: null, info: null }
+	) {
 		const row = document.createElement("div");
 		row.style.display = "grid";
 		row.style.gridTemplateColumns = "120px 1fr 1fr 1fr auto";
@@ -922,6 +924,8 @@ function mountCourseForm() {
 		rawInfoInput.style.textAlign = "left";
 		rawInfoInput.style.borderRadius = "6px";
 
+		if (init.info) rawInfoInput.value = init.info;
+
 		infoInput.appendChild(rawInfoInput);
 
 		const del = document.createElement("button");
@@ -961,6 +965,7 @@ function mountCourseForm() {
 				day,
 				start: normalizeTime(course[day].start),
 				end: normalizeTime(course[day].end),
+				info: course[day].info,
 			});
 		});
 	});
@@ -988,7 +993,7 @@ function mountCourseForm() {
 		const entry = {};
 		for (const row of rows) {
 			const daySel = row.querySelector("select");
-			const [startSelHour, startSelMin, endSelHour, endSelMin, info] =
+			const [startSelHour, startSelMin, endSelHour, endSelMin, infoElem] =
 				row.querySelectorAll("fieldset input");
 
 			const day = daySel.value;
@@ -1000,6 +1005,8 @@ function mountCourseForm() {
 				alert(`End must be after start for ${day}.`);
 				return;
 			}
+
+			const info = infoElem.value;
 
 			entry[day] = { start, end, info };
 		}
