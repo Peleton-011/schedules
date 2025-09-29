@@ -550,6 +550,7 @@ function mountCourseForm() {
 
 		// Summary
 		const formSummary = document.createElement("summary");
+        formSummary.className = "form-summary"
 
 		// Title
 		const h3 = document.createElement("h3");
