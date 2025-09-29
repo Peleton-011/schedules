@@ -1114,8 +1114,17 @@ function render() {
 	const alt = generateAltSection();
 	const form = mountCourseForm();
 
-	const title = document.createElement("h1");
-	title.textContent = "My Schedule 🗓️";
+	const title = document.createElement("div");
+    title.style.width = "70%";
+    title.style.display = "flex";
+    title.style.justifyContent = "space-between";
+    const name = document.createElement("h1");
+	name.textContent = "My Schedule";
+    const icon = document.createElement("h1");
+    icon.textContent = "📅"; //🗓️
+    title.append(name, icon);
+
+    
 
 	main.append(title, schedule, form);
 	body.append(main, alt);
