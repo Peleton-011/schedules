@@ -220,7 +220,7 @@ function drawSchedule() {
 
 		const cell = document.createElement("div");
 		cell.classList.add("cell");
-		cell.textContent = days[i];
+		cell.textContent = days[i].slice(0, 1).toUpperCase() + days[i].slice(1);
 		cell.style.position = "absolute";
 		// put day labels in the top gutter, centered over each column
 		cell.style.top = `calc(-1 * var(--day-head) + 0.25rem)`;
