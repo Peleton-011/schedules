@@ -233,7 +233,7 @@ details {
 	user-select: none;
 }
 
-details > summary.form-summary span.icon {
+details > summary.collapsible-summary span.icon {
 	width: 24px;
 	height: 24px;
 	font-size: larger;
@@ -241,15 +241,15 @@ details > summary.form-summary span.icon {
 	margin-left: auto;
 }
 
-details[open] summary.form-summary span.icon {
+details[open] summary.collapsible-summary span.icon {
 	transform: rotate(405deg);
 }
 
-summary.form-summary {
+summary.collapsible-summary {
 	display: flex;
 	cursor: pointer;
 }
 
-summary.form-summary::-webkit-details-marker {
+summary.collapsible-summary::-webkit-details-marker {
 	display: none;
 }

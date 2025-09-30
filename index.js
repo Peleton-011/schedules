@@ -531,6 +531,30 @@ function findAllCombinations(courses, courseAmount = 5) {
 	return combinations;
 }
 
+function makeCollapsible(name) {
+	const host = document.createElement("details");
+
+	// Summary
+	const collapsibleSummary = document.createElement("summary");
+	collapsibleSummary.className = "collapsible-summary";
+
+	// Title
+	const h3 = document.createElement("h3");
+	h3.textContent = name;
+	h3.style.margin = "0 0 1rem 0";
+	collapsibleSummary.appendChild(h3);
+
+	// Icon
+	const icon = document.createElement("span");
+	icon.className = "icon";
+	icon.textContent = "➕";
+	collapsibleSummary.appendChild(icon);
+
+	host.appendChild(collapsibleSummary);
+
+	return host;
+}
+
 // Course input
 
 function mountCourseForm() {
@@ -545,27 +569,8 @@ function mountCourseForm() {
 	host.style.fontFamily = "system-ui, sans-serif";
 
 	function makeCourseForm(courses) {
-		const host = document.createElement("details");
+		const host = makeCollapsible("Add / Edit Course");
 		host.className = "course-form";
-
-		// Summary
-		const formSummary = document.createElement("summary");
-        formSummary.className = "form-summary"
-
-		// Title
-		const h3 = document.createElement("h3");
-		h3.textContent = "Add / Edit Course";
-		h3.style.margin = "0 0 1rem 0";
-		formSummary.appendChild(h3);
-
-		// Icon
-
-		const icon = document.createElement("span");
-		icon.className = "icon";
-		icon.textContent = "➕";
-		formSummary.appendChild(icon);
-
-		host.appendChild(formSummary);
 
 		// Row: label + input
 		const nameRow = document.createElement("div");
@@ -1115,14 +1120,14 @@ function render() {
 	const form = mountCourseForm();
 
 	const title = document.createElement("div");
-    title.style.width = "70%";
-    title.style.display = "flex";
-    const name = document.createElement("h1");
+	title.style.width = "70%";
+	title.style.display = "flex";
+	const name = document.createElement("h1");
 	name.textContent = "My Schedule";
-    const icon = document.createElement("h1");
-    icon.textContent = "📅"; //🗓️
-    icon.style.marginLeft = "1rem"
-    title.append(name, icon);    
+	const icon = document.createElement("h1");
+	icon.textContent = "📅"; //🗓️
+	icon.style.marginLeft = "1rem";
+	title.append(name, icon);
 
 	main.append(title, schedule, form);
 	body.append(main, alt);
