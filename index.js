@@ -296,7 +296,7 @@ function generateSchedule() {
 function generateAltSection() {
 	// Toggles
 
-	const toggles = document.createElement("div");
+	const toggles = makeCollapsible("Choose Courses");
 	toggles.classList.add("toggles");
 
 	for (const courseName in courses) {
@@ -335,23 +335,20 @@ function generateAltSection() {
 
 	// Conflicts
 
-	const conflictsDiv = document.createElement("div");
+	const conflictsDiv = makeCollapsible("Schedule Conflicts");
 	conflictsDiv.classList.add("conflicts");
-	conflictsDiv.textContent = "Conflicts: ";
 
 	const conflicts = findConflicts(courses);
 	conflicts.forEach((conflict) => {
 		const conflictDiv = document.createElement("div");
 		conflictDiv.classList.add("conflict");
-		conflictDiv.textContent = conflict.join("//");
 		conflictsDiv.appendChild(conflictDiv);
 	});
 
 	// Possible Combinations
 
-	const combinationsElem = document.createElement("fieldset");
+	const combinationsElem = makeCollapsible("Possible Combinations");
 	combinationsElem.classList.add("combinations");
-	combinationsElem.textContent = "Possible Combinations: ";
 
 	const combinations = findAllCombinations(courses);
 	combinations.forEach((combination, index) => {
@@ -446,7 +443,6 @@ function findConflicts(courses) {
 
 function updateConflicts() {
 	const conflictsDiv = document.querySelector(".conflicts");
-	conflictsDiv.innerHTML = "Conflicts: ";
 
 	const conflicts = findConflicts(courses);
 
@@ -458,7 +454,16 @@ function updateConflicts() {
 		const [courseA, courseB] = conflict;
 		const conflictDiv = document.createElement("div");
 		conflictDiv.classList.add("conflict");
-		conflictDiv.textContent = conflict.join(", ");
+		const elemA = document.createElement("span");
+		elemA.textContent = courseA;
+		const elemB = document.createElement("span");
+		elemB.textContent = courseB;
+		conflictDiv.appendChild(elemA);
+		const span = document.createElement("span");
+		span.style.color = "black";
+		span.textContent = " & ";
+		conflictDiv.appendChild(span);
+		conflictDiv.appendChild(elemB);
 
 		// Check if both courses are selected
 		const toggleA = document.getElementById(courseA);
@@ -534,6 +539,10 @@ function findAllCombinations(courses, courseAmount = 5) {
 function makeCollapsible(name) {
 	const host = document.createElement("details");
 
+	host.style.border = "1px solid #ddd";
+	host.style.borderRadius = "8px";
+	host.style.padding = "0.75rem";
+
 	// Summary
 	const collapsibleSummary = document.createElement("summary");
 	collapsibleSummary.className = "collapsible-summary";
@@ -561,9 +570,6 @@ function mountCourseForm() {
 	const host = document.createElement("div");
 	host.className = "course-form";
 	host.style.marginTop = "1rem";
-	host.style.padding = "0.75rem";
-	host.style.border = "1px solid #ddd";
-	host.style.borderRadius = "8px";
 	host.style.maxWidth = "640px";
 	host.style.width = "100%";
 	host.style.fontFamily = "system-ui, sans-serif";
