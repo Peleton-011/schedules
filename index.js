@@ -448,6 +448,15 @@ function updateConflicts() {
 
 	const table = document.querySelector(".table");
 
+    if (conflicts.length == 0) {
+        const noConflicts = document.createElement("div"); 
+        noConflicts.style.marginLeft = "1rem";
+        noConflicts.style.alignItems = "center";
+        noConflicts.textContent = "No Conflicts!";
+
+        conflictsDiv.appendChild(noConflicts);
+    } 
+
 	let error = false;
 
 	conflicts.forEach((conflict) => {
