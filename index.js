@@ -359,7 +359,7 @@ function generateAltSection() {
 		radioBtn.addEventListener("change", () => {
 			// console.log("changed!");
 			const allToggles = document.querySelectorAll(
-				"div.toggles > div.group > input[type='checkbox']"
+				"details.toggles > div.group > input[type='checkbox']"
 			);
 			const combinationToggles = combination.map((courseName) =>
 				document.getElementById(courseName)
