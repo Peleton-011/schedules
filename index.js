@@ -1117,14 +1117,12 @@ function render() {
 	const title = document.createElement("div");
     title.style.width = "70%";
     title.style.display = "flex";
-    title.style.justifyContent = "space-between";
     const name = document.createElement("h1");
 	name.textContent = "My Schedule";
     const icon = document.createElement("h1");
     icon.textContent = "📅"; //🗓️
-    title.append(name, icon);
-
-    
+    icon.style.marginLeft = "1rem"
+    title.append(name, icon);    
 
 	main.append(title, schedule, form);
 	body.append(main, alt);
