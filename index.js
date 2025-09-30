@@ -566,9 +566,9 @@ function makeCollapsible(name) {
 
 // Course input
 
-function mountCourseForm() {
+function generateCourseForm() {
 	const host = document.createElement("div");
-	host.className = "course-form";
+	host.className = "course-form-wrapper";
 	host.style.marginTop = "1rem";
 	host.style.maxWidth = "640px";
 	host.style.width = "100%";
@@ -1123,10 +1123,14 @@ function render() {
 	const main = document.createElement("main");
 	const schedule = generateSchedule();
 	const alt = generateAltSection();
-	const form = mountCourseForm();
+	const form = generateCourseForm();
+
+    const titleWrapper = document.createElement("div");
+	titleWrapper.style.width = "80%";
+	titleWrapper.style.display = "flex";
 
 	const title = document.createElement("div");
-	title.style.width = "70%";
+    title.style.width = "75%";
 	title.style.display = "flex";
 	const name = document.createElement("h1");
 	name.textContent = "My Schedule";
@@ -1135,7 +1139,9 @@ function render() {
 	icon.style.marginLeft = "1rem";
 	title.append(name, icon);
 
-	main.append(title, schedule, form);
+    titleWrapper.append(title, form)
+
+	main.append(titleWrapper, schedule);
 	body.append(main, alt);
 }
 

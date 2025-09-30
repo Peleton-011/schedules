@@ -259,3 +259,15 @@ summary.collapsible-summary {
 summary.collapsible-summary::-webkit-details-marker {
 	display: none;
 }
+
+
+.course-form-wrapper {
+    position: relative;
+    display: flex;
+}
+.course-form {
+    position: absolute;
+    width: inherit;
+    background: #fff;
+    z-index: 5;
+}
